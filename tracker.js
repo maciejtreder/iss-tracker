@@ -4,8 +4,10 @@ import { Subject, ReplaySubject, merge} from 'rxjs';
 import { map, distinctUntilChanged, filter, tap } from 'rxjs/operators';
 import { sendSMS } from './rxjs-twilio';
 
-const inputFilePath = './checkpoints.json';
-
+/*
+STEP 1
+*/
+const inputFilePath = './stargizers.json';
 const stargizers$ = new ReplaySubject(1);
 
 function readFile() {
@@ -20,6 +22,9 @@ function readFile() {
 fs.watchFile(inputFilePath, readFile);
 readFile();
  
+/*
+STEP 2
+*/
 const issPosition$ = new Subject();
 
 setInterval(() => {
@@ -30,6 +35,10 @@ setInterval(() => {
             console.error(error);
         });
 }, 1000);
+
+/*
+STEP 3
+*/
   
 function isNearby(point1, point2){
     let longDiff = Math.abs(parseFloat(point1.longitude) - point2.longitude);
@@ -60,6 +69,6 @@ stargizers$
         });
         
         smsSubscription = merge(...observables$).subscribe(stargizer => {
-            sendSMS(stargizer.phoneNumber, 'Head up! ISS is approaching you!').subscribe(console.log);
+            sendSMS(stargizer.phoneNumber, 'Head up! ISS is approaching you!').subscribe(console.log); //step 4
         });
     });
