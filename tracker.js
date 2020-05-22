@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import fetch from 'node-fetch';
 import { Subject, ReplaySubject } from 'rxjs';
+import { distinctUntilChanged, filter, flatMap, map, skip, takeUntil } from 'rxjs/operators';
 
 const inputFilePath = './stargazers.json';
 const stargazers$ = new ReplaySubject(1);
@@ -28,4 +29,23 @@ setInterval(() => {
        });
 }, 1000);
  
-issPosition$.subscribe(console.log);
+function isNearby(point1, point2){
+    let latDiff = Math.abs(parseFloat(point1.latitude) - point2.latitude);
+    let lonDiff = Math.abs(parseFloat(point1.longitude) - point2.longitude);
+    return latDiff < 5 && lonDiff < 5;
+ }
+  
+ stargazers$.pipe(
+    flatMap(x => x),
+    flatMap(stargazer => {
+        return issPosition$.pipe(
+            map(issPosition => isNearby(issPosition.iss_position, stargazer.position)),
+            distinctUntilChanged(),
+            filter(isNearby => isNearby),
+            map( _ => 'ISS is approaching ' + stargazer.name),
+            takeUntil(stargazers$.pipe(
+                skip(1)
+            ))
+        );
+    })
+ ).subscribe(console.log);
