@@ -1,0 +1,19 @@
+[
+   {
+       "name": "Jacek",
+       "phoneNumber": "+15017122661",
+       "position": {
+           "latitude": -30,
+           "longitude": -51
+           }
+   },
+   {
+       "name": "Placek",
+       "phoneNumber": "+15017122661",
+       "position": {
+           "latitude": -9,
+           "longitude": -170
+       }
+   }
+]
+
