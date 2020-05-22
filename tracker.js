@@ -1,6 +1,7 @@
 import * as fs from 'fs';
-import { ReplaySubject } from 'rxjs';
- 
+import fetch from 'node-fetch';
+import { Subject, ReplaySubject } from 'rxjs';
+
 const inputFilePath = './stargazers.json';
 const stargazers$ = new ReplaySubject(1);
 
@@ -16,4 +17,15 @@ function readFile() {
  fs.watchFile(inputFilePath, readFile);
  readFile();
   
- stargazers$.subscribe(console.log);
+ const issPosition$ = new Subject();
+ 
+setInterval(() => {
+   fetch('http://api.open-notify.org/iss-now.json')
+       .then(resp => resp.json())
+       .then(resp => issPosition$.next(resp))
+       .catch(error => {
+           console.error(error);
+       });
+}, 1000);
+ 
+issPosition$.subscribe(console.log);
