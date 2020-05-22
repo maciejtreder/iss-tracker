@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import fetch from 'node-fetch';
 import { Subject, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, map, skip, takeUntil } from 'rxjs/operators';
+import { sendSMS } from './rxjs-twilio';
 
 const inputFilePath = './stargazers.json';
 const stargazers$ = new ReplaySubject(1);
@@ -42,7 +43,7 @@ function isNearby(point1, point2){
             map(issPosition => isNearby(issPosition.iss_position, stargazer.position)),
             distinctUntilChanged(),
             filter(isNearby => isNearby),
-            map( _ => 'ISS is approaching ' + stargazer.name),
+            flatMap( _ => sendSMS(stargazer.phoneNumber, 'HEADS UP! ISS is approaching you!')),
             takeUntil(stargazers$.pipe(
                 skip(1)
             ))
